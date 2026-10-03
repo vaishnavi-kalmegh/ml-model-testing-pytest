@@ -6,15 +6,17 @@ A QA-focused project: train a small customer-churn classifier with scikit-learn,
 
 ## What gets tested
 
-| Area | Scenarios |
-|---|---|
-| Happy path | Valid predictions, correct shape and labels |
-| Bad inputs | Empty input, non-DataFrame input, unexpected columns |
-| Missing data | Missing columns, partial NaNs, all numeric values missing |
-| Wrong data types | Text supplied to numeric features |
-| Unseen categories | New plan / region values at inference time |
-| Model contracts | Reproducibility, integer/binary outputs |
-| Persistence | Save and reload the trained model |
+**29 automated test cases collected by pytest**
+
+| Area | Test cases | Coverage |
+|---|---:|---|
+| Happy path | 5 | Valid predictions, binary labels, row-level shape, single valid record |
+| Bad inputs | 3 | Empty/non-DataFrame input and unexpected columns |
+| Missing data | 4 | Missing columns, all numeric values missing, partial NaNs, `None` vs `NaN` |
+| Wrong data types | 2 | Text supplied to numeric features |
+| Unseen categories | 3 | New plan/region values plus case/whitespace variants |
+| Quality and behaviour | 11 | Column order, mutation safety, row/batch consistency, reproducibility, label type, quality floor, numeric extremes |
+| Persistence | 1 | Save and reload the trained model |
 
 ## Key design decision: invalid vs. unfamiliar
 
@@ -56,7 +58,7 @@ Run a single category with markers, e.g. `pytest -m unseen_category`.
 
 ## CI
 
-GitHub Actions runs on every push and pull request: install dependencies, train the model, run the full suite, and upload the HTML report as a workflow artifact.
+GitHub Actions runs on every push and pull request: install dependencies, run the self-contained pytest suite, and upload the HTML report as a workflow artifact. The tests train their own session-scoped model, so CI does not depend on a previously generated model file.
 
 ## Sample run
 
