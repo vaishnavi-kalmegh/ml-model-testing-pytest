@@ -4,6 +4,8 @@ __pycache__/
 .pytest_cache/
 reports/*.html
 models/*.joblib
+.coverage
+htmlcov/
 .DS_Store
 .idea/
 .vscode/
