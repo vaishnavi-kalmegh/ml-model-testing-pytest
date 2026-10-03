@@ -1,84 +1,67 @@
 # ML Model Testing with Python + pytest
 
-A portfolio project demonstrating QA testing of a machine-learning classification pipeline, including data-contract validation and edge cases.
+[![tests](https://github.com/vaishnavi-kalmegh/ml-model-testing-pytest/actions/workflows/tests.yml/badge.svg)](https://github.com/vaishnavi-kalmegh/ml-model-testing-pytest/actions/workflows/tests.yml)
 
-## Project goal
+A QA-focused project: train a small customer-churn classifier with scikit-learn, then try to break its prediction interface with pytest. The point is not the model's accuracy. It is proving the pipeline fails loudly on bad data and stays stable on unfamiliar-but-valid data.
 
-This project trains a small binary customer-churn classifier with scikit-learn and tests its prediction interface with pytest. The preprocessing pipeline handles numeric missing values and categorical values, including categories that were not present during training.
+## What gets tested
 
-## QA coverage
-
-**18 automated tests**
-
-| Area | Coverage |
+| Area | Scenarios |
 |---|---|
-| Happy path | Valid predictions, shape and labels |
+| Happy path | Valid predictions, correct shape and labels |
 | Bad inputs | Empty input, non-DataFrame input, unexpected columns |
-| Missing data | Missing columns, partial missing values, all numeric values missing |
+| Missing data | Missing columns, partial NaNs, all numeric values missing |
 | Wrong data types | Text supplied to numeric features |
-| Unseen categories | New plan/region values |
-| Model quality contracts | Reproducibility and integer/binary outputs |
-| Persistence | Save and reload trained model |
+| Unseen categories | New plan / region values at inference time |
+| Model contracts | Reproducibility, integer/binary outputs |
+| Persistence | Save and reload the trained model |
 
-## Technology
+## Key design decision: invalid vs. unfamiliar
 
-- Python
-- pandas
-- NumPy
-- scikit-learn
-- joblib
-- pytest
-- pytest-html
-- GitHub Actions
+The suite separates **invalid data** from **valid but unfamiliar data**.
+
+- Text in a numeric column breaks the data contract, so it is rejected with a clear `TypeError`.
+- An unseen category such as `enterprise` is valid input the model has simply never seen, so it is accepted (`OneHotEncoder(handle_unknown="ignore")`).
+- Partial missing numeric values are filled by median imputation.
+- A row where *every* numeric feature is missing has no usable signal, so it is rejected.
 
 ## Project structure
 
-    model/classifier.py
-    tests/test_classifier.py
-    train.py
-    requirements.txt
-    pytest.ini
-    .github/workflows/tests.yml
+```
+model/classifier.py          # pipeline + train/predict/save/load
+tests/test_classifier.py     # pytest suite
+train.py                     # trains and saves the model
+pytest.ini                   # pytest config, markers, HTML report
+.github/workflows/tests.yml  # CI
+```
 
 ## Run locally
 
-    python -m venv .venv
-    .venv\Scripts\Activate.ps1
-    pip install -r requirements.txt
-    python train.py
-    pytest
+```bash
+python -m venv .venv
 
-The self-contained HTML report is generated at reports/report.html.
+# Windows (PowerShell)
+.venv\Scripts\Activate.ps1
+# macOS / Linux
+source .venv/bin/activate
 
-## ML-specific testing approach
+pip install -r requirements.txt
+python train.py
+pytest
+```
 
-The suite separates invalid data contracts from valid but unfamiliar data.
+The HTML report is written to `reports/report.html`.
 
-A numeric feature supplied as text is rejected with a clear TypeError. In contrast, an unseen category such as enterprise is accepted because OneHotEncoder uses handle_unknown="ignore". This verifies that the inference pipeline is robust to categories that were not present in the training dataset.
+Run a single category with markers, e.g. `pytest -m unseen_category`.
 
-Partial missing numeric values are supported through median imputation. An input where every numeric feature is missing is rejected because it contains no usable numeric signal.
+## CI
 
-## CI/CD
+GitHub Actions runs on every push and pull request: install dependencies, train the model, run the full suite, and upload the HTML report as a workflow artifact.
 
-GitHub Actions runs on every push and pull request. The workflow:
+## Sample run
 
-1. Installs Python and dependencies.
-2. Trains the classifier.
-3. Runs the complete pytest suite.
-4. Generates a self-contained HTML report.
-5. Uploads the report as a workflow artifact.
-
-## Portfolio evidence
-
-After a real execution, useful evidence screenshots include:
-
-- Repository structure
-- Terminal pytest result
-- pytest HTML report
-- GitHub Actions successful run
-- Example unseen-category test
-
-Execution screenshots should be captured from a real run; fabricated evidence is intentionally not included.
+<!-- Add a real screenshot after running pytest, then uncomment: -->
+<!-- ![pytest results](docs/pytest-results.png) -->
 
 ## Author
 
