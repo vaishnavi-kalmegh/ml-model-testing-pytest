@@ -58,9 +58,7 @@ def test_invalid_input_contracts_are_rejected(model, data, error, message):
     "data",
     [
         valid_input().drop(columns=["region"]),
-        valid_input().assign(
-            age=np.nan, monthly_spend=np.nan, support_tickets=np.nan
-        ),
+        valid_input().assign(age=np.nan, monthly_spend=np.nan, support_tickets=np.nan),
     ],
 )
 def test_missing_required_data_is_rejected(model, data):
@@ -122,9 +120,7 @@ def test_none_and_nan_numeric_values_are_imputed(model):
     nan_data = valid_input()
     none_data.loc[0, "monthly_spend"] = None
     nan_data.loc[0, "monthly_spend"] = np.nan
-    np.testing.assert_array_equal(
-        predict(model, none_data), predict(model, nan_data)
-    )
+    np.testing.assert_array_equal(predict(model, none_data), predict(model, nan_data))
 
 
 @pytest.mark.unseen_category
@@ -142,9 +138,7 @@ def test_category_casing_and_whitespace_are_distinct(model):
 def test_shuffled_column_order_gives_identical_predictions(model):
     """Shuffled columns produce the same predictions because features are named."""
     data = valid_input()
-    shuffled = data[
-        ["region", "support_tickets", "plan", "age", "monthly_spend"]
-    ]
+    shuffled = data[["region", "support_tickets", "plan", "age", "monthly_spend"]]
     np.testing.assert_array_equal(predict(model, data), predict(model, shuffled))
 
 

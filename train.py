@@ -1,4 +1,5 @@
 """Train the churn classifier and save it to disk."""
+
 from pathlib import Path
 
 from model.classifier import train_model
